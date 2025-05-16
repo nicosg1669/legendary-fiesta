@@ -91,30 +91,32 @@ echo -e "      uso: ${usage}, país: ${ctry}"
 # BLOQUE 3 — Carlos Ramírez: Análisis RDAP + Puertos Abiertos
 echo -e "\n${BOLD}${CYAN}===== BLOQUE 3: Análisis RDAP + Puertos Abiertos — Carlos Ramírez =====${NC}"
 
-echo -e "-> WHOIS vía RDAP/HTTPS…"
+# WHOIS RDAP
 rdap=$(curl -s "https://rdap.arin.net/registry/ip/$IP")
 CIDR=$(jq -r '.startAddress + "/" + .prefixLength' <<<"$rdap")
 NETNM=$(jq -r '.name'                         <<<"$rdap")
 CTRY2=$(jq -r '.country'                      <<<"$rdap")
+echo -e "-> WHOIS vía RDAP/HTTPS…"
 echo -e "   🧾 CIDR: ${CIDR}, NetName: ${NETNM}, Country: ${CTRY2}"
 
+# Escaneo de puertos
 echo -e "-> Escaneo rápido de puertos abiertos (top 20)…"
-open_ports=$(nmap -Pn --top-ports 20 "$IP" 2>/dev/null \
-              | awk '/tcp.*open/ {print $1}' | paste -sd ',' -)
-
-if [[ -n $open_ports ]]; then
-  # Si hay alguno, los listamos
-  echo "$open_ports"
-else
-  # Si no, indicamos que no hay ninguno :c
-  echo "Ninguno"
+# guardamos el resultado en PORTS (sólo las líneas “open”)
+PORTS=$(nmap -Pn --top-ports 20 "$IP" 2>/dev/null \
+          | awk '/\/tcp.*open/ {printf "%s,", $1}' \
+          | sed 's/,$//')
+# si no hay ninguno, ponemos “Ninguno”
+if [[ -z "$PORTS" ]]; then
+  PORTS="Ninguno"
 fi
+echo -e "   🔓 Puertos abiertos: ${GREEN}${PORTS}${NC}"
 
+# Clasificación de riesgo
 echo -e "-> Clasificando riesgo avanzado…"
 pts=0
-(( count        > 0    )) && ((pts++))
-(( score        > 25   )) && ((pts++))
-[[ -n "$PORTS" && "$PORTS" != "Ninguno" ]] && ((pts++))
+(( count      > 0    )) && ((pts++))
+(( score      > 25   )) && ((pts++))
+[[ "$PORTS" != "Ninguno" ]] && ((pts++))
 case $pts in
   0) icon="🟢"; lvl="BAJO";   msg="IP segura."           ;;
   1) icon="🟡"; lvl="MEDIO";  msg="Monitorear actividad." ;;
@@ -146,7 +148,7 @@ echo -e "📄 Generando reporte en ${REPORTE}…"
 
 echo -e "✅ Reporte guardado como ${GREEN}$REPORTE${NC}"
 
-# Forzamos remitente para que coincida con cuenta autenticada
+# Forzamos remitente (“-r”) para coincidir con cuenta autenticada
 FROM="carlos.ramirez105@inacapmail.cl"
 TO="nicolas.montero@inacapmail.cl"
 
@@ -155,5 +157,4 @@ echo "Adjunto el reporte de la IP analizada ($IP)." \
   | mail -r "$FROM" -s "Reporte IP $IP" -A "$REPORTE" "$TO"
 
 echo -e "📧 Reporte enviado correctamente a ${GREEN}${TO}${NC}"
-
 echo -e "\n${BOLD}${CYAN}🚀 ANÁLISIS COMPLETO FINALIZADO 🚀${NC}"
