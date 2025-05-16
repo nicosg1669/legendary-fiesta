@@ -139,4 +139,3 @@ riesgo=$?
 recomienda "$riesgo"
 
 echo -e "\n${BOLD}${CYAN}✅ Análisis finalizado.${NC}"
-dsfstrddghfdhg
