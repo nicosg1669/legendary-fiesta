@@ -52,7 +52,7 @@ show_whois() {
 }
 show_whois "$IP"
 
-# ─── BLOQUE 2: DNSBL & AbuseIPDB — Carlos Ramírez
+# ─── BLOQUE 2: DNSBL & AbuseIPDB — Nicole Picart
 echo -e "\n${BOLD}${CYAN}===== BLOQUE 2: DNSBL & AbuseIPDB — Carlos Ramírez =====${NC}"
 rev=$(awk -F. '{print $4"."$3"."$2"."$1}' <<<"$IP")
 count=0
@@ -82,7 +82,7 @@ ctry=$(jq -r '.data.countryCode // "N/A"'       <<<"$resp")
 echo -e "   🛡️ AbuseIPDB score: ${YELLOW}${score}%${NC}, reports: ${reports}"
 echo -e "      uso: ${usage}, país: ${ctry}"
 
-# ─── BLOQUE 5: SHODAN.IO — Info Adicional
+# ─── BLOQUE 3: SHODAN.IO — Info Adicional─── Carlos Ramírez
 echo -e "\n${BOLD}${CYAN}===== BLOQUE 5: SHODAN.IO — Info Adicional =====${NC}"
 shodan_json=$(curl -s "https://api.shodan.io/shodan/host/${IP}?key=${SHODAN_API_KEY}")
 sh_org=$(jq -r '.org // "N/D"' <<<"$shodan_json")
@@ -92,7 +92,7 @@ echo -e "   🏢 Organización: ${sh_org}"
 echo -e "   💻 SO detectado: ${sh_os}"
 echo -e "   🔍 Puertos Shodan: ${sh_ports:-Ninguno}"
 
-# ─── BLOQUE 3: RDAP + Puertos Abiertos — Carlos Ramírez
+# ─── BLOQUE 4: RDAP + Puertos Abiertos — Emilia Silva
 echo -e "\n${BOLD}${CYAN}===== BLOQUE 3: RDAP + Puertos Abiertos — Carlos Ramírez =====${NC}"
 rdap=$(curl -s "https://rdap.arin.net/registry/ip/$IP")
 CIDR=$(jq -r '.startAddress + "/" + .prefixLength' <<<"$rdap")
@@ -118,7 +118,7 @@ case $pts in
 esac
 echo -e "   📌 ${icon} Riesgo Avanzado: ${lvl} — ${msg}"
 
-# ─── BLOQUE 4: Reporte y envío por correo — Jaime M. Ultima Actualizacion :3
+# ─── BLOQUE 5: Reporte y envío por correo — Jaime M. Ultima Actualizacion :3
 echo -e "\n${BOLD}${CYAN}===== BLOQUE 4: REPORTE Y ENVÍO POR CORREO — Jaime M. =====${NC}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 REPORTE="reporte_${IP}_${TIMESTAMP}.txt"
