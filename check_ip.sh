@@ -84,6 +84,19 @@ usage=$(jq -r '.data.usageType // "N/A"'         <<<"$resp")
 ctry=$(jq -r '.data.countryCode // "N/A"'       <<<"$resp")
 echo -e "   🛡️ AbuseIPDB score: ${YELLOW}${score}%${NC}, reports: ${YELLOW}${reports}${NC}"
 echo -e "      uso: ${usage}, país: ${ctry}"
+# ────────────────────────────────────────────────────────────────
+# Shodan.io: info adicional
+echo -e "\n${BOLD}${CYAN}===== BLOQUE 5: SHODAN.IO — Info Adicional =====${NC}"
+SHODAN_API_KEY="o7SxScQXBOXv1BXNnMBGvjkxaynqmqva"
+shodan_json=$(curl -s "https://api.shodan.io/shodan/host/${IP}?key=${SHODAN_API_KEY}")
+
+org=$(jq -r '.org // "N/D"' <<<"$shodan_json")
+os=$(jq -r '.os // "N/D"' <<<"$shodan_json")
+shodan_ports=$(jq -r '.ports // [] | join(",")' <<<"$shodan_json")
+
+echo -e "   🏢 Organización: ${org}"
+echo -e "   💻 Sistema operativo: ${os}"
+echo -e "   🔍 Puertos reportados por Shodan: ${shodan_ports:-Ninguno}"
 
 # ─── BLOQUE 3: Análisis RDAP + Puertos Abiertos ───── Carlos Ramírez
 echo -e "\n${BOLD}${CYAN}===== BLOQUE 3: Análisis RDAP + Puertos Abiertos — Carlos Ramírez =====${NC}"
