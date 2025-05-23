@@ -83,7 +83,7 @@ echo -e "   🛡️ AbuseIPDB score: ${YELLOW}${score}%${NC}, reports: ${reports
 echo -e "      uso: ${usage}, país: ${ctry}"
 
 # ─── BLOQUE 3: SHODAN.IO — Info Adicional─── Carlos Ramírez
-echo -e "\n${BOLD}${CYAN}===== BLOQUE 5: SHODAN.IO — Info Adicional — Carlos Ramírez =====${NC}"
+echo -e "\n${BOLD}${CYAN}===== BLOQUE 3: SHODAN.IO — Info Adicional — Carlos Ramírez =====${NC}"
 shodan_json=$(curl -s "https://api.shodan.io/shodan/host/${IP}?key=${SHODAN_API_KEY}")
 sh_org=$(jq -r '.org // "N/D"' <<<"$shodan_json")
 sh_os=$(jq -r '.os // "N/D"'  <<<"$shodan_json")
@@ -93,7 +93,7 @@ echo -e "   💻 SO detectado: ${sh_os}"
 echo -e "   🔍 Puertos Shodan: ${sh_ports:-Ninguno}"
 
 # ─── BLOQUE 4: RDAP + Puertos Abiertos — Emilia Silva
-echo -e "\n${BOLD}${CYAN}===== BLOQUE 3: RDAP + Puertos Abiertos — Emilia Silva =====${NC}"
+echo -e "\n${BOLD}${CYAN}===== BLOQUE 4: RDAP + Puertos Abiertos — Emilia Silva =====${NC}"
 rdap=$(curl -s "https://rdap.arin.net/registry/ip/$IP")
 CIDR=$(jq -r '.startAddress + "/" + .prefixLength' <<<"$rdap")
 NETNM=$(jq -r '.name'                         <<<"$rdap")
@@ -119,7 +119,7 @@ esac
 echo -e "   📌 ${icon} Riesgo Avanzado: ${lvl} — ${msg}"
 
 # ─── BLOQUE 5: Reporte y envío por correo — Jaime M. Ultima Actualizacion :3
-echo -e "\n${BOLD}${CYAN}===== BLOQUE 4: REPORTE Y ENVÍO POR CORREO — Jaime M. =====${NC}"
+echo -e "\n${BOLD}${CYAN}===== BLOQUE 5: REPORTE Y ENVÍO POR CORREO — Jaime M. =====${NC}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 REPORTE="reporte_${IP}_${TIMESTAMP}.txt"
 
