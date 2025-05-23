@@ -1,0 +1,51 @@
+# ─── BLOQUE 4: Reporte y envío por correo — Jaime M. Actualizacion
+echo -e "\n${BOLD}${CYAN}===== BLOQUE 4: REPORTE Y ENVÍO POR CORREO — Jaime M. =====${NC}"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+REPORTE="reporte_${IP}_${TIMESTAMP}.txt"
+
+echo -e "📄 Generando reporte en ${REPORTE}…"
+{
+  echo "===== REPORTE DE ANÁLISIS DE IP ====="
+  echo "IP: $IP"
+  echo "Fecha: $(date)"
+
+  echo ""
+  echo "🌍 GEO: $GEO"
+  echo ""
+  echo "🧾 WHOIS RDAP: CIDR=$CIDR, NetName=$NETNM, Country=$CTRY2"
+
+  echo ""
+  echo -n "📛 DNSBLs ($count): "
+  if (( count>0 )); then
+    printf "%s " "${listed[@]}"
+  else
+    echo -n "Ninguna"
+  fi
+
+  echo ""
+  echo "🛡 AbuseIPDB: $score% — $reports reportes — uso: $usage — país: $ctry"
+
+  echo ""
+  echo "🏢 Shodan Org: $sh_org"
+  echo "💻 Shodan SO:  $sh_os"
+  echo "🔍 Puertos Shodan: ${sh_ports:-Ninguno}"
+
+  echo ""
+  echo "🔓 Puertos abiertos (Nmap): $PORTS"
+
+  echo ""
+  echo "🚨 Riesgo Avanzado: $lvl — $msg"
+} > "$REPORTE"
+
+echo -e "✅ Reporte guardado como ${GREEN}$REPORTE${NC}"
+
+# Forzamos remitente para que coincida con cuenta autenticada
+FROM="carlos.ramirez105@inacapmail.cl"
+TO="nicolas.montero@inacapmail.cl"
+
+echo -e "📬 Enviando reporte automáticamente a: ${TO}"
+echo "Adjunto el reporte de la IP analizada ($IP)." \
+  | mail -r "$FROM" -s "Reporte IP $IP" -A "$REPORTE" "$TO"
+
+echo -e "📧 Reporte enviado correctamente a ${GREEN}${TO}${NC}"
+echo -e "\n${BOLD}${CYAN}🚀 ANÁLISIS COMPLETO FINALIZADO 🚀${NC}"
