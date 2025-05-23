@@ -13,8 +13,8 @@ RED='\e[1;91m';   GREEN='\e[1;92m';  YELLOW='\e[1;93m'
 CYAN='\e[1;96m';  WHITE='\e[1;97m';   BOLD='\e[1m';  NC='\e[0m'
 
 check_deps() {
-  local deps=(curl jq dig nmap whois mail)
-  local miss=()
+  local deps=(curl jq dig nmap whois mail) # (HTTP, JSON, DNS, PUERTOS, INFORMACION IP, MAIL)
+  local miss=() # (Crea un arreglo vacío llamado MISS)
   for cmd in "${deps[@]}"; do
     command -v "$cmd" &>/dev/null || miss+=("$cmd")
   done
