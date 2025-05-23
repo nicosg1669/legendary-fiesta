@@ -118,7 +118,7 @@ case $pts in
 esac
 echo -e "   📌 ${icon} Riesgo Avanzado: ${lvl} — ${msg}"
 
-# ─── BLOQUE 4: Reporte y envío por correo — Jaime M.
+# ─── BLOQUE 4: Reporte y envío por correo — Jaime M. Ultima Actualizacion :3
 echo -e "\n${BOLD}${CYAN}===== BLOQUE 4: REPORTE Y ENVÍO POR CORREO — Jaime M. =====${NC}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 REPORTE="reporte_${IP}_${TIMESTAMP}.txt"
