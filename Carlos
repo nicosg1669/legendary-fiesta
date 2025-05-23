@@ -1,0 +1,66 @@
+# ─── BLOQUE 2: DNSBL & AbuseIPDB — Carlos Ramírez
+echo -e "\n${BOLD}${CYAN}===== BLOQUE 2: DNSBL & AbuseIPDB — Carlos Ramírez =====${NC}"
+rev=$(awk -F. '{print $4"."$3"."$2"."$1}' <<<"$IP")
+count=0
+listed=()
+for bl in zen.spamhaus.org pbl.spamhaus.org sbl.spamhaus.org xbl.spamhaus.org \
+          bl.spamcop.net dnsbl.sorbs.net b.barracudacentral.org \
+          dnsbl-1.uceprotect.net psbl.surriel.com; do
+  if dig +short "${rev}.${bl}" | grep -qE '127\.0\.0\.[0-9]+'; then
+    echo -e "   - ${RED}En lista:${NC} $bl"
+    ((count++)); listed+=("$bl")
+  else
+    echo -e "   - ${GREEN}No en lista:${NC} $bl"
+  fi
+done
+echo -e "   📛 Total DNSBLs: ${count}"
+
+echo -e "-> Consultando AbuseIPDB…"
+resp=$(curl -sG https://api.abuseipdb.com/api/v2/check \
+         --data-urlencode "ipAddress=$IP" \
+         -d maxAgeInDays=90 \
+         -H "Key: $ABUSEIPDB_API_KEY" \
+         -H "Accept: application/json")
+score=$(jq -r '.data.abuseConfidenceScore // "N/A"' <<<"$resp")
+reports=$(jq -r '.data.totalReports // "N/A"'    <<<"$resp")
+usage=$(jq -r '.data.usageType // "N/A"'         <<<"$resp")
+ctry=$(jq -r '.data.countryCode // "N/A"'       <<<"$resp")
+echo -e "   🛡️ AbuseIPDB score: ${YELLOW}${score}%${NC}, reports: ${reports}"
+echo -e "      uso: ${usage}, país: ${ctry}"
+
+# ─── BLOQUE 5: SHODAN.IO — Info Adicional
+echo -e "\n${BOLD}${CYAN}===== BLOQUE 5: SHODAN.IO — Info Adicional =====${NC}"
+shodan_json=$(curl -s "https://api.shodan.io/shodan/host/${IP}?key=${SHODAN_API_KEY}")
+sh_org=$(jq -r '.org // "N/D"' <<<"$shodan_json")
+sh_os=$(jq -r '.os // "N/D"'  <<<"$shodan_json")
+sh_ports=$(jq -r '.ports // [] | join(",")' <<<"$shodan_json")
+echo -e "   🏢 Organización: ${sh_org}"
+echo -e "   💻 SO detectado: ${sh_os}"
+echo -e "   🔍 Puertos Shodan: ${sh_ports:-Ninguno}"
+
+# ─── BLOQUE 3: RDAP + Puertos Abiertos — Carlos Ramírez
+echo -e "\n${BOLD}${CYAN}===== BLOQUE 3: RDAP + Puertos Abiertos — Carlos Ramírez =====${NC}"
+rdap=$(curl -s "https://rdap.arin.net/registry/ip/$IP")
+CIDR=$(jq -r '.startAddress + "/" + .prefixLength' <<<"$rdap")
+NETNM=$(jq -r '.name'                         <<<"$rdap")
+CTRY2=$(jq -r '.country'                      <<<"$rdap")
+echo -e "-> WHOIS RDAP: CIDR=${CIDR}, NetName=${NETNM}, Country=${CTRY2}"
+
+echo -e "-> Escaneo rápido de puertos abiertos (top 20)…"
+PORTS=$(nmap -Pn --top-ports 20 "$IP" 2>/dev/null \
+          | awk '/\/tcp.*open/ {printf "%s,", $1}' | sed 's/,$//')
+[[ -z "$PORTS" ]] && PORTS="Ninguno"
+echo -e "   🔓 Puertos abiertos: ${GREEN}${PORTS}${NC}"
+
+echo -e "-> Clasificando riesgo avanzado…"
+pts=0
+(( count   > 0 )) && ((pts++))
+(( score   > 25)) && ((pts++))
+[[ "$PORTS" != "Ninguno" ]] && ((pts++))
+case $pts in
+  0) icon="🟢"; lvl="BAJO";   msg="IP segura."           ;;
+  1) icon="🟡"; lvl="MEDIO";  msg="Monitorear actividad." ;;
+  *)  icon="🔴"; lvl="ALTO";   msg="Bloquear/investigar." ;;
+esac
+echo -e "   📌 ${icon} Riesgo Avanzado: ${lvl} — ${msg}"
+
